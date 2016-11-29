@@ -1,0 +1,32 @@
+{
+  "name": "group-doodle",
+  "version": "1.0.0",
+  "description": "Web app for collaborative doodling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ebracho/GroupDoodle.git"
+  },
+  "main": "app.js",
+  "scripts": {
+    "test": "echo Test suite has not been set up.",
+    "start": "node app.js"
+  },
+  "author": "Eddie Bracho",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^3.11.1",
+    "eslint-config-google": "^0.7.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "browserify": "^13.1.1",
+    "express": "^4.14.0",
+    "express-session": "^1.14.2",
+    "method-override": "^2.3.7",
+    "mongoose": "^4.7.0",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "shortid": "^2.2.6",
+    "socketio": "^1.0.0"
+  }
+}

@@ -1,0 +1,17 @@
+version: '2'
+services:
+  db:
+    image: mongo
+  web:
+    build: .
+    command: npm start
+    volumes:
+      - .:/code
+    ports:
+      - "3000:3000"
+    environment:
+      - SECRET=development-secret
+      - MONGODB_URL=db
+      - GROUP_DOODLE_PORT=3000
+    depends_on:
+      - db
