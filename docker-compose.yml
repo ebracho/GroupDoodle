@@ -3,10 +3,10 @@ services:
   db:
     image: mongo
   web:
-    build: .
+    build: ./app
     command: npm start
     volumes:
-      - .:/code
+      - ./app:/code
     ports:
       - "3000:3000"
     environment:
