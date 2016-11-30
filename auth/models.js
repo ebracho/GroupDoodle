@@ -23,6 +23,7 @@ userSchema.methods.validatePassword = function(password) {
   return this.hash === hash;
 }
 
+// Session token used for authentication over websockets
 var sessionTokenSchema = mongoose.Schema({
   token: {
     type: String,
@@ -51,9 +52,9 @@ sessionTokenSchema.methods.expire = function() {
   this.save();
 };
 
-sessionTokenSchema.methods.verify = function(token) {
+sessionTokenSchema.methods.verify = function() {
   var now = new Date();
-  return now < this.expiration && token === this.token;
+  return now < this.expiration;
 };
 
 var User = mongoose.model('User', userSchema);
