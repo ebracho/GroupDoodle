@@ -1,12 +1,14 @@
-var mongoose = require('mongoose');
-var crypto = require('crypto');
-var shortid = require('shortid');
+'use strict';
 
-var userSchema = mongoose.Schema({
+let mongoose = require('mongoose');
+let crypto = require('crypto');
+let shortid = require('shortid');
+
+let userSchema = new mongoose.Schema({
   userId: {
     type: String,
     unique: true,
-    required: true
+    required: true,
   },
   hash: String,
   salt: String,
@@ -19,32 +21,32 @@ userSchema.methods.setPassword = function(password) {
 };
 
 userSchema.methods.validatePassword = function(password) {
-  var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+  let hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
   return this.hash === hash;
-}
+};
 
 // Session token used for authentication over websockets
-var sessionTokenSchema = mongoose.Schema({
+let sessionTokenSchema = new mongoose.Schema({
   token: {
     type: String,
     unique: true,
     required: true,
-    default: shortid.generate
+    default: shortid.generate,
   },
   userId: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
   expiration: {
     type: Date,
     required: true,
     default: function() {
-      var d = new Date();
+      let d = new Date();
       d.setDate(d.getDate() + 7);
       return d;
-    }
-  }
+    },
+  },
 });
 
 sessionTokenSchema.methods.expire = function() {
@@ -53,14 +55,14 @@ sessionTokenSchema.methods.expire = function() {
 };
 
 sessionTokenSchema.methods.verify = function() {
-  var now = new Date();
+  let now = new Date();
   return now < this.expiration;
 };
 
-var User = mongoose.model('User', userSchema);
-var SessionToken = mongoose.model('SessionToken', sessionTokenSchema);
+let User = mongoose.model('User', userSchema);
+let SessionToken = mongoose.model('SessionToken', sessionTokenSchema);
 
 module.exports = {
   User: User,
-  SessionToken: SessionToken
+  SessionToken: SessionToken,
 };

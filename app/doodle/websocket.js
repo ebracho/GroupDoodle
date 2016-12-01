@@ -1,24 +1,32 @@
-var mongoose = require('mongoose');
-var socketio = require('socket.io');
-var socketioAuth = require('socketio-auth');
-var shortid = require('shortid');
-var User = mongoose.model('User');
-var SessionToken = mongoose.model('SessionToken');
+'use strict';
 
-//
-// - Group Doodle Websocket Control Flow -
-//
-// 1) User creates room, becomes the owner
-//
-// 2a) Strokes are recorded to redis, broadcast to room
-// 2b) New users join room, receive stroke history
-//
-// 3a) Owner closes room
-// 3b) Close signal is broadcast to room
-// 3c) Stroke history is saved and published as a Doodle
-//
+let mongoose = require('mongoose');
+let socketio = require('socket.io');
+let socketioAuth = require('socketio-auth');
+let User = mongoose.model('User');
+let SessionToken = mongoose.model('SessionToken');
 
-// Verifies that client provided a valid session token
+/*
+ * - Group Doodle Websocket Control Flow -
+ *
+ * 1) User creates room, becomes the owner
+ *
+ * 2a) Strokes are recorded to redis, broadcast to room
+ * 2b) New users join room, receive stroke history
+ *
+ * 3a) Owner closes room
+ * 3b) Close signal is broadcast to room
+ * 3c) Stroke history is saved and published as a Doodle
+ *
+ */
+
+/**
+ * Verifies that client provided a valid session token
+ *
+ * @param {Socket} socket
+ * @param {Object} data
+ * @param {Function} cb
+ */
 function authenticate(socket, data, cb) {
   SessionToken.findOne({token: data.token}, function(sessionToken) {
     if (err || !sesssionToken) return cb(new Error('Invalid session token'));
@@ -26,16 +34,24 @@ function authenticate(socket, data, cb) {
   });
 }
 
-// Retrieves user and stores in socket.client object
+/**
+ * Retrieves user and stores in socket.client object
+ *
+ * @param {Socket} socket
+ * @param {Object} data
+ */
 function postAuthenticate(socket, data) {
   User.findOne({userId: data.userId}, function(err, user) {
     socket.client.user = user;
   });
 }
 
-// Assigns event handlers to socket
+/**
+ * Assigns event handlers to socket
+ *
+ * @param {Socket} socket
+ */
 function connection(socket) {
-
   // Creates and joins a Doodle room, returns room meta data
   socket.on('createRoom', function() {
   });
@@ -51,15 +67,14 @@ function connection(socket) {
   // Exits a Doodle room. If user was the room owner, closes the room
   socket.on('leaveRoom', function(room) {
   });
-
 }
 
 module.exports.listen = function(server) {
-  var io = socketio.listen(server);
+  let io = socketio.listen(server);
   socketioAuth(io, {
     authenticate: authenticate,
-    postAuthenticate: postAuthenticate
+    postAuthenticate: postAuthenticate,
   });
   io.on('connection', connection);
   return io;
-};
+  };

@@ -1,12 +1,13 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var session = require('express-session');
-var mongoose = require('mongoose');
-var config = require('./config');
-var db = require('./db');
+'use strict';
 
-var app = express();
+let express = require('express');
+let bodyParser = require('body-parser');
+let methodOverride = require('method-override');
+let session = require('express-session');
+let config = require('./config');
+require('./db');
+
+let app = express();
 
 // Load middleware
 app.use(bodyParser.urlencoded({'extended': true}));
@@ -15,14 +16,15 @@ app.use(methodOverride());
 app.use(session({
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
 }));
 
 // Load routers
 app.use(require('./auth/router'));
+app.use(require('./frontend/router'));
 
 // Listen for http connections
-var server = app.listen(config.env.PORT, function() {
+let server = app.listen(config.env.PORT, function() {
   console.log(`listening on port ${config.env.PORT}`);
 });
 

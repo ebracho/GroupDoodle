@@ -1,18 +1,20 @@
-var mongoose = require('mongoose');
-var shortid = require('shortid');
+'use strict';
+
+let mongoose = require('mongoose');
+let shortid = require('shortid');
 
 // Contains images that were submitted from a doodle room
-var doodleSchema = mongoose.Schema({
+let doodleSchema = new mongoose.Schema({
   doodleId: {
     type: String,
     unique: true,
     required: true,
-    default: shortid.generate
+    default: shortid.generate,
   },
   illustrators: [{
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   }],
   strokes: [{
     startX: Number,
@@ -21,33 +23,33 @@ var doodleSchema = mongoose.Schema({
     endY: Number,
     color: Number, // hexcode
     timestamp: Date,
-    userId: String
-  }]
+    userId: String,
+  }],
 });
 
 // Contains meta data for websocket doodle-rooms
-var doodleRoomSchema = mongoose.Schema({
+let doodleRoomSchema = new mongoose.Schema({
   roomId: {
     type: String,
     unique: true,
     required: true,
-    default: shortid.generate
+    default: shortid.generate,
   },
   owner: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
   active: {
     type: Boolean,
-    required: true
-  }
+    required: true,
+  },
 });
 
-var Doodle = mongoose.model('Doodle', doodleSchema);
-var DoodleRoom = mongoose.model('DoodleRoom', doodleRoomSchema);
+let Doodle = mongoose.model('Doodle', doodleSchema);
+let DoodleRoom = mongoose.model('DoodleRoom', doodleRoomSchema);
 
 module.exports = {
   Doodle: Doodle,
-  DoodleRoom: DoodleRoom
+  DoodleRoom: DoodleRoom,
 };
