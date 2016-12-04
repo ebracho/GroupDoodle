@@ -36,6 +36,7 @@
     "react-router": "^3.0.0",
     "shortid": "^2.2.6",
     "socket.io": "^1.7.1",
+    "socket.io-client": "^1.7.1",
     "socketio-auth": "^0.1.0",
     "webpack": "^1.13.3"
   }

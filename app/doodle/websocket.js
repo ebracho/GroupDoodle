@@ -1,12 +1,11 @@
 'use strict';
 
 let config = require('../config');
-let mongoose = require('mongoose');
 let redis = require('redis');
 let socketio = require('socket.io');
 let socketioAuth = require('socketio-auth');
-let User = mongoose.model('User');
-let SessionToken = mongoose.model('SessionToken');
+let User = require('../auth/models').User;
+let SessionToken = require('../auth/models').SessionToken;
 
 let redisClient = redis.createClient({host: config.REDIS_HOST});
 
@@ -32,9 +31,9 @@ let redisClient = redis.createClient({host: config.REDIS_HOST});
  * @param {Function} cb
  */
 function authenticate(socket, data, cb) {
-  SessionToken.findOne({token: data.token}, function(sessionToken) {
-    if (err || !sesssionToken) return cb(new Error('Invalid session token'));
-    return cb(null, sessionToken.verify());
+  SessionToken.findOne({token: data.session.token}, (err, sessionToken) => {
+    if (err || !sessionToken) return cb(new Error('Invalid session token'));
+    return cb(null, sessionToken.isValid());
   });
 }
 
@@ -45,7 +44,7 @@ function authenticate(socket, data, cb) {
  * @param {Object} data
  */
 function postAuthenticate(socket, data) {
-  User.findOne({userId: data.userId}, function(err, user) {
+  User.findOne({userId: data.session.userId}, function(err, user) {
     socket.client.user = user;
   });
 }
@@ -56,6 +55,11 @@ function postAuthenticate(socket, data) {
  * @param {Socket} socket
  */
 function connection(socket) {
+  // Ping-pong
+  socket.on('ping', function() {
+    socket.emit('pong');
+  });
+
   // Joins a Doodle room
   socket.on('joinRoom', function(room) {
   });

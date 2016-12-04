@@ -1,10 +1,8 @@
 'use strict';
 
 let express = require('express');
-let mongoose = require('mongoose');
-
-let User = mongoose.model('User');
-let SessionToken = mongoose.model('SessionToken');
+let User = require('../auth/models').User;
+let SessionToken = require('../auth/models').SessionToken;
 let router = new express.Router();
 
 /**
@@ -38,6 +36,8 @@ function register(req, res) {
         user.setPassword(req.body.password);
         req.session.user = user;
         SessionToken.create(user, function(err, sessionToken) {
+          console.log(sessionToken);
+          sessionToken.save();
           res.status(201).json(sessionToken);
         });
       }

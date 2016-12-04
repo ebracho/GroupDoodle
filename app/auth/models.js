@@ -40,7 +40,6 @@ let sessionTokenSchema = new mongoose.Schema({
   },
   userId: {
     type: String,
-    ref: 'User',
     required: true,
   },
   expiration: {
@@ -54,15 +53,17 @@ let sessionTokenSchema = new mongoose.Schema({
   },
 });
 
+/*
 sessionTokenSchema.methods.expire = function() {
   this.expiration = new Date();
   this.save();
 };
 
-sessionTokenSchema.methods.verify = function() {
+sessionTokenSchema.methods.isValid = function() {
   let now = new Date();
   return now < this.expiration;
 };
+*/
 
 let User = mongoose.model('User', userSchema);
 let SessionToken = mongoose.model('SessionToken', sessionTokenSchema);

@@ -1,11 +1,10 @@
 'use strict';
 
 let express = require('express');
-let mongoose = require('mongoose');
-let router = new express.Router();
-let DoodleRoom = mongoose.model('DoodleRoom');
-let Doodle = mongoose.model('Doodle');
+let DoodleRoom = require('./models').DoodleRoom;
+let Doodle= require('./models').Doodle;
 
+let router = new express.Router();
 
 /**
  * Creates a Doodle Room and returns its meta data.
