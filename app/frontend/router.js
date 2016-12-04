@@ -1,6 +1,6 @@
 'use strict';
 
-// Use this router LAST! Has catch-all matcher '*' for single-page app
+// Use this router LAST! Has catch-all matcher '*' for single page app router
 
 let express = require('express');
 let router = new express.Router();
@@ -16,6 +16,6 @@ function home(req, res) {
 }
 
 router.use('/static', express.static('public'));
-router.get('/', home);
+router.get('*', home);
 
 module.exports = router;

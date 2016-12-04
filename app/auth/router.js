@@ -32,11 +32,15 @@ function register(req, res) {
     res.status(400).send('User already exists');
   } else {
     User.create({userId: req.body.userId}, function(err, user) {
-      user.setPassword(req.body.password);
-      req.session.userId = user.userId;
-      SessionToken.create(user, function(err, sessionToken) {
-        res.status(201).json(sessionToken);
-      });
+      if (err) {
+        res.sendStatus(400);
+      } else {
+        user.setPassword(req.body.password);
+        req.session.userId = user.userId;
+        SessionToken.create(user, function(err, sessionToken) {
+          res.status(201).json(sessionToken);
+        });
+      }
     });
   }
 }

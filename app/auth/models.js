@@ -9,6 +9,11 @@ let userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
+    validate: {
+      validator: (v) => {
+        return /^[0-9A-Za-z]{3,15}$/.test(v);
+      },
+    },
   },
   hash: String,
   salt: String,
