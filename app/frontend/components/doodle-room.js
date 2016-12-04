@@ -22,16 +22,16 @@ class DoodleRoom extends React.Component {
       });
       this.socket.on('authenticated', () => {
         // Ping-pong.
-        this.socket.on('pong', () => {
-          console.log('>pong');
+        this.socket.on('bar', () => {
+          console.log('>bar');
         });
       });
     });
   }
   /** Sends ping packet to websocket server. */
   ping() {
-    console.log('<ping');
-    this.socket.emit('ping');
+    console.log('<foo');
+    this.socket.emit('foo');
   }
   /**
    * Renders doodle in real time.

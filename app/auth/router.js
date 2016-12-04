@@ -1,5 +1,7 @@
 'use strict';
 
+require('mongoose').set('debug', true);
+
 let express = require('express');
 let User = require('../auth/models').User;
 let SessionToken = require('../auth/models').SessionToken;
@@ -14,6 +16,7 @@ let router = new express.Router();
  */
 function loadUser(req, res, next) {
   User.findOne({userId: req.body.userId}, function(err, user) {
+    console.log('Prelaoded user:', user);
     req.user = user;
     next();
   });
@@ -27,22 +30,23 @@ function loadUser(req, res, next) {
  */
 function register(req, res) {
   if(req.user) {
-    res.status(400).send('User already exists');
-  } else {
-    User.create({userId: req.body.userId}, function(err, user) {
-      if (err) {
-        res.sendStatus(400);
-      } else {
-        user.setPassword(req.body.password);
-        req.session.user = user;
-        SessionToken.create(user, function(err, sessionToken) {
-          console.log(sessionToken);
-          sessionToken.save();
-          res.status(201).json(sessionToken);
-        });
-      }
-    });
+    res.status(400).send('User already exists'); return;
   }
+  User.create({userId: req.body.userId})
+    .then(function(user) {
+      return user.setPassword(req.body.password);
+    })
+    .then(function(user) {
+      req.session.user = user;
+      return SessionToken.create({userId: user.userId});
+    })
+    .then(function(token) {
+      return res.status(201).json(token);
+    })
+    .catch(function(err) {
+      console.error(err);
+      return res.sendStatus(500);
+    });
 }
 
 /**
@@ -53,13 +57,17 @@ function register(req, res) {
  */
 function login(req, res) {
   if(!req.user || !req.user.validatePassword(req.body.password)) {
-    res.status(401).send('Incorrect userId or password');
-  } else {
-    req.session.user = req.user;
-    SessionToken.create(req.user, function(err, sessionToken) {
-      res.status(200).json(sessionToken);
-    });
+    res.status(401).send('Incorrect userId or password'); return;
   }
+  req.session.user = req.user;
+  SessionToken.create({userId: user.userId})
+    .then(function(sessionToken) {
+      return res.status(200).json(sessionToken);
+    })
+    .catch(function(err) {
+      console.error(err);
+      res.sendStatus(500);
+    });
 }
 
 

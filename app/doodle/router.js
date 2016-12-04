@@ -14,12 +14,16 @@ let router = new express.Router();
  */
 function createRoom(req, res) {
   if (!req.session.user) {
-    res.sendStatus(401);
-  } else {
-    DoodleRoom.create({owner: req.session.user.userId}, function(err, room) {
-      res.status(201).json(room);
-    });
+    res.sendStatus(401); return;
   }
+  DoodleRoom.create({owner: req.session.user.userId})
+    .then(function(room) {
+      res.status(201).json(room);
+    })
+    .catch(function(err) {
+      console.error(err);
+      res.sendStatus(500);
+    });
 }
 
 /**
@@ -29,9 +33,14 @@ function createRoom(req, res) {
  * @param {Response} res
  */
 function getActiveRooms(req, res) {
-  DoodleRoom.find({active: true}, function(err, rooms) {
-    res.status(200).json({rooms});
-  });
+  DoodleRoom.find({active: true})
+    .then(function(rooms) {
+      res.status(200).json(rooms);
+    })
+    .catch(function(err) {
+      console.error(err);
+      res.sendStatus(500);
+    });
 }
 
 /**
@@ -41,9 +50,14 @@ function getActiveRooms(req, res) {
  * @param {Response} res
  */
 function getDoodles(req, res) {
-  Doodle.find({}, function(err, doodles) {
-    res.status(200).send(map(doodles, (doodle) => doodle.doodleId));
-  });
+  Doodle.find()
+    .then(function(doodles) {
+      res.status(200).send(map(doodles, (doodle) => doodle.doodleId));
+    })
+    .catch(function(err) {
+      console.error(err);
+      res.sendStatus(500);
+    });
 }
 
 /**
@@ -53,13 +67,17 @@ function getDoodles(req, res) {
  * @param {Response} res
  */
 function getDoodle(req, res) {
-  Doodle.findOne({doodleId: req.body.doodleId}, function(err, doodle) {
-    if (!doodle) {
-      res.sendStatus(404);
-    } else {
-      res.status(200).json(doodle);
-    }
-  });
+  Doodle.findOne({doodleId: req.body.doodleId})
+    .then(function(doodle) {
+      if (!doodle)
+        res.sendStatus(404);
+      else
+        res.status(200).json(doodle);
+    })
+    .catch(function(err) {
+      console.error(err);
+      res.sendStatus(500);
+    });
 }
 
 router.post('/createRoom', createRoom);

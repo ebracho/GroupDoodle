@@ -35,8 +35,8 @@ class Dashboard extends React.Component {
   getRooms() {
     $.get({
       url: '/getActiveRooms',
-      success: (data) => {
-        this.setState({rooms: data.rooms});
+      success: (rooms) => {
+        this.setState({rooms});
       },
       error: (xhr, status, error) => {
         console.error(status, error);

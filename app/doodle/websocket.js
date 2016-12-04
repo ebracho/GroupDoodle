@@ -55,9 +55,11 @@ function postAuthenticate(socket, data) {
  * @param {Socket} socket
  */
 function connection(socket) {
-  // Ping-pong
-  socket.on('ping', function() {
-    socket.emit('pong');
+  // Ping-pong, for debugging
+  socket.on('foo', function() {
+    console.log(`${socket.client.user.userId}>foo`);
+    socket.emit('bar');
+    console.log(`${socket.client.user.userId}<bar`);
   });
 
   // Joins a Doodle room

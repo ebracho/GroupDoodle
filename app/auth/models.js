@@ -22,7 +22,7 @@ let userSchema = new mongoose.Schema({
 userSchema.methods.setPassword = function(password) {
   this.salt = crypto.randomBytes(16).toString('hex');
   this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
-  this.save();
+  return this.save(); // Return promise
 };
 
 userSchema.methods.validatePassword = function(password) {
@@ -53,7 +53,6 @@ let sessionTokenSchema = new mongoose.Schema({
   },
 });
 
-/*
 sessionTokenSchema.methods.expire = function() {
   this.expiration = new Date();
   this.save();
@@ -63,7 +62,6 @@ sessionTokenSchema.methods.isValid = function() {
   let now = new Date();
   return now < this.expiration;
 };
-*/
 
 let User = mongoose.model('User', userSchema);
 let SessionToken = mongoose.model('SessionToken', sessionTokenSchema);

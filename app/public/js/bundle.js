@@ -29059,8 +29059,8 @@
 
 	      _jquery2.default.get({
 	        url: '/getActiveRooms',
-	        success: function success(data) {
-	          _this3.setState({ rooms: data.rooms });
+	        success: function success(rooms) {
+	          _this3.setState({ rooms: rooms });
 	        },
 	        error: function error(xhr, status, _error) {
 	          console.error(status, _error);
@@ -29171,8 +29171,8 @@
 	      });
 	      _this.socket.on('authenticated', function () {
 	        // Ping-pong.
-	        _this.socket.on('pong', function () {
-	          console.log('>pong');
+	        _this.socket.on('bar', function () {
+	          console.log('>bar');
 	        });
 	      });
 	    });
@@ -29184,8 +29184,8 @@
 	  _createClass(DoodleRoom, [{
 	    key: 'ping',
 	    value: function ping() {
-	      console.log('<ping');
-	      this.socket.emit('ping');
+	      console.log('<foo');
+	      this.socket.emit('foo');
 	    }
 	    /**
 	     * Renders doodle in real time.
