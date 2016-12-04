@@ -21,11 +21,12 @@ app.use(session({
 
 // Load routers
 app.use(require('./auth/router'));
+app.use(require('./doodle/router'));
 app.use(require('./frontend/router'));
 
 // Listen for http connections
-let server = app.listen(config.env.PORT, function() {
-  console.log(`listening on port ${config.env.PORT}`);
+let server = app.listen(config.PORT, function() {
+  console.log(`listening on port ${config.PORT}`);
 });
 
 // Load websocket handlers and listen for websocket connections

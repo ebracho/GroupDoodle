@@ -60,6 +60,8 @@
 
 	var _dashboard = __webpack_require__(242);
 
+	var _doodleRoom = __webpack_require__(243);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -130,6 +132,9 @@
 	  return App;
 	}(_react2.default.Component);
 
+	/* Build and install router. */
+
+
 	(0, _reactDom.render)(_react2.default.createElement(
 	  _reactRouter.Router,
 	  { history: _reactRouter.browserHistory },
@@ -137,7 +142,8 @@
 	    _reactRouter.Route,
 	    { path: '/', component: App },
 	    _react2.default.createElement(_reactRouter.Route, { path: 'auth', component: _auth.AuthForm }),
-	    _react2.default.createElement(_reactRouter.Route, { path: 'dashboard', component: _dashboard.Dashboard, onEnter: _auth.requireAuth })
+	    _react2.default.createElement(_reactRouter.Route, { path: 'dashboard', component: _dashboard.Dashboard, onEnter: _auth.requireAuth }),
+	    _react2.default.createElement(_reactRouter.Route, { path: '/room/:id', component: _doodleRoom.DoodleRoom, onEnter: _auth.requireAuth })
 	  )
 	), document.getElementById('content'));
 
@@ -28982,6 +28988,10 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _jquery = __webpack_require__(240);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
@@ -29000,25 +29010,106 @@
 	var Dashboard = function (_React$Component) {
 	  _inherits(Dashboard, _React$Component);
 
-	  function Dashboard() {
+	  /**
+	   * Sets initial state values and starts polling for active rooms.
+	   *
+	   * @param {Properties} props
+	   */
+	  function Dashboard(props) {
 	    _classCallCheck(this, Dashboard);
 
-	    return _possibleConstructorReturn(this, (Dashboard.__proto__ || Object.getPrototypeOf(Dashboard)).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, (Dashboard.__proto__ || Object.getPrototypeOf(Dashboard)).call(this, props));
+
+	    _this.state = { rooms: [] };
+	    _this.getRooms();
+	    _this.roomPollingIntervalId = setInterval(_this.getRooms.bind(_this), 2000);
+	    return _this;
 	  }
+	  /** Terminates room polling */
+
 
 	  _createClass(Dashboard, [{
-	    key: 'render',
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      clearInterval(this.roomPollingIntervalId);
+	    }
+	    /** Creates a Doodle Room and redirects to it. */
 
+	  }, {
+	    key: 'createRoom',
+	    value: function createRoom() {
+	      var _this2 = this;
+
+	      _jquery2.default.post({
+	        url: '/createRoom',
+	        success: function success(room) {
+	          _this2.props.router.replace('/room/' + room.roomId);
+	        },
+	        error: function error(xhr, status, err) {
+	          console.error(status, err);
+	        }
+	      });
+	    }
+	    /** Populates state with active room meta data. */
+
+	  }, {
+	    key: 'getRooms',
+	    value: function getRooms() {
+	      var _this3 = this;
+
+	      _jquery2.default.get({
+	        url: '/getActiveRooms',
+	        success: function success(data) {
+	          _this3.setState({ rooms: data.rooms });
+	        },
+	        error: function error(xhr, status, _error) {
+	          console.error(status, _error);
+	        }
+	      });
+	    }
 	    /**
 	     * Renders Dashboard component.
 	     *
 	     * @return {Element} Component DOM element.
 	     */
+
+	  }, {
+	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
-	        'h2',
+	        'div',
 	        null,
-	        'Hello from Dashboard!'
+	        _react2.default.createElement(
+	          'h2',
+	          null,
+	          'Hello from Dashboard!'
+	        ),
+	        ';',
+	        _react2.default.createElement(
+	          'h3',
+	          null,
+	          'Active Rooms'
+	        ),
+	        _react2.default.createElement(
+	          'ul',
+	          null,
+	          this.state.rooms.map(function (room) {
+	            return _react2.default.createElement(
+	              'li',
+	              { key: room.roomId },
+	              _react2.default.createElement(
+	                _reactRouter.Link,
+	                { to: '/room/' + room.roomId },
+	                room.owner + ' (' + room.roomId + ')'
+	              )
+	            );
+	          })
+	        ),
+	        _react2.default.createElement(
+	          'button',
+	          { onClick: this.createRoom.bind(this) },
+	          'Create Room'
+	        )
 	      );
 	    }
 	  }]);
@@ -29027,6 +29118,88 @@
 	}(_react2.default.Component);
 
 	module.exports = { Dashboard: (0, _reactRouter.withRouter)(Dashboard) };
+
+/***/ },
+/* 243 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(183);
+
+	var _auth = __webpack_require__(239);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/**  */
+	var DoodleRoom = function (_React$Component) {
+	  _inherits(DoodleRoom, _React$Component);
+
+	  /**
+	   * Emits authentication packet.
+	   *
+	   * @param {Properties} props
+	   */
+	  function DoodleRoom(props) {
+	    _classCallCheck(this, DoodleRoom);
+
+	    var _this = _possibleConstructorReturn(this, (DoodleRoom.__proto__ || Object.getPrototypeOf(DoodleRoom)).call(this, props));
+
+	    _this.authWebsocket((0, _auth.getSession)());
+	    return _this;
+	  }
+	  /**
+	   * Emits websocket session object.
+	   *
+	   * @param {Session} session Contains session data.
+	   */
+
+
+	  _createClass(DoodleRoom, [{
+	    key: 'authWebsocket',
+	    value: function authWebsocket(session) {}
+	    // TODO
+
+	    /**
+	     * Renders doodle in real time.
+	     *
+	     * @return {Element} Component DOM element.
+	     */
+
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'h2',
+	          null,
+	          'Hello from Room ',
+	          this.props.params.id,
+	          '!'
+	        ),
+	        ';'
+	      );
+	    }
+	  }]);
+
+	  return DoodleRoom;
+	}(_react2.default.Component);
+
+	module.exports = { DoodleRoom: (0, _reactRouter.withRouter)(DoodleRoom) };
 
 /***/ }
 /******/ ]);

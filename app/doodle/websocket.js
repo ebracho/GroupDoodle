@@ -1,10 +1,14 @@
 'use strict';
 
+let config = require('../config');
 let mongoose = require('mongoose');
+let redis = require('redis');
 let socketio = require('socket.io');
 let socketioAuth = require('socketio-auth');
 let User = mongoose.model('User');
 let SessionToken = mongoose.model('SessionToken');
+
+let redisClient = redis.createClient({host: config.REDIS_HOST});
 
 /*
  * - Group Doodle Websocket Control Flow -
@@ -52,10 +56,6 @@ function postAuthenticate(socket, data) {
  * @param {Socket} socket
  */
 function connection(socket) {
-  // Creates and joins a Doodle room, returns room meta data
-  socket.on('createRoom', function() {
-  });
-
   // Joins a Doodle room
   socket.on('joinRoom', function(room) {
   });
@@ -77,4 +77,4 @@ module.exports.listen = function(server) {
   });
   io.on('connection', connection);
   return io;
-  };
+};

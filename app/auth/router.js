@@ -36,7 +36,7 @@ function register(req, res) {
         res.sendStatus(400);
       } else {
         user.setPassword(req.body.password);
-        req.session.userId = user.userId;
+        req.session.user = user;
         SessionToken.create(user, function(err, sessionToken) {
           res.status(201).json(sessionToken);
         });
@@ -55,7 +55,7 @@ function login(req, res) {
   if(!req.user || !req.user.validatePassword(req.body.password)) {
     res.status(401).send('Incorrect userId or password');
   } else {
-    req.session.userId = req.user.userId;
+    req.session.user = req.user;
     SessionToken.create(req.user, function(err, sessionToken) {
       res.status(200).json(sessionToken);
     });
@@ -70,7 +70,7 @@ function login(req, res) {
  * @param {Response} res
  */
 function logout(req, res) {
-  delete req.session.userId;
+  delete req.session.user;
   res.sendStatus(200);
 }
 
@@ -81,7 +81,7 @@ function logout(req, res) {
  * @param {Response} res
  */
 function getLoggedInUser(req, res) {
-  if (req.session.userId) res.send(req.session.userId);
+  if (req.session.user) res.send(req.session.user.userId);
   else res.sendStatus(404);
 }
 

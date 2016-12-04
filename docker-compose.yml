@@ -2,6 +2,8 @@ version: '2'
 services:
   db:
     image: mongo
+  redis:
+    image: redis
   web:
     build: ./app
     command: npm start
@@ -11,7 +13,9 @@ services:
       - "3000:3000"
     environment:
       - SECRET=development-secret
-      - MONGODB_URL=db
+      - MONGODB_HOST=db
+      - REDIS_HOST=redis
       - GROUP_DOODLE_PORT=3000
     depends_on:
       - db
+      - redis

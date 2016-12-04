@@ -5,6 +5,7 @@ import {render} from 'react-dom';
 import {browserHistory, Router, Route, Link} from 'react-router';
 import {logout, requireAuth, AuthForm} from './auth';
 import {Dashboard} from './dashboard';
+import {DoodleRoom} from './doodle-room';
 
 /** Wrapper component for app, renders navbar. */
 class App extends React.Component {
@@ -24,11 +25,13 @@ class App extends React.Component {
   }
 }
 
+/* Build and install router. */
 render((
   <Router history={browserHistory}>
     <Route path='/' component={App}>
       <Route path='auth' component={AuthForm} />
       <Route path='dashboard' component={Dashboard} onEnter={requireAuth} />
+      <Route path='/room/:id' component={DoodleRoom} onEnter={requireAuth} />
     </Route>
   </Router>
 ), document.getElementById('content'));

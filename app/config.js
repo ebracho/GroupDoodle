@@ -1,6 +1,13 @@
 'use strict';
+let shortid = require('shortid');
 
-module.exports.env = {
-  MONGODB_URL: process.env.MONGODB_URL || 'localhost',
+// Use url-friendly characters for ids
+shortid.characters(
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@'
+);
+
+module.exports = {
+  MONGODB_HOST: process.env.MONGODB_HOST || 'localhost',
+  REDIS_HOST: process.env.REDIS_HOST || 'localhost',
   PORT: process.env.GROUP_DOODLE_PORT || 3000,
 };
