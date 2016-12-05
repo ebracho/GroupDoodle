@@ -31,7 +31,7 @@ render((
     <Route path='/' component={App}>
       <Route path='auth' component={AuthForm} />
       <Route path='dashboard' component={Dashboard} onEnter={requireAuth} />
-      <Route path='/room/:id' component={DoodleRoom} onEnter={requireAuth} />
+      <Route path='room/:id' component={DoodleRoom} onEnter={requireAuth} />
     </Route>
   </Router>
 ), document.getElementById('content'));

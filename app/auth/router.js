@@ -70,7 +70,6 @@ function login(req, res) {
     });
 }
 
-
 /**
  * Ends the user's http session if it exists.
  *

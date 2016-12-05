@@ -51,7 +51,7 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div>
-        <h2>Hello from Dashboard!</h2>;
+        <h2>Hello from Dashboard!</h2>
         <h3>Active Rooms</h3>
         <ul>
           {this.state.rooms.map((room) =>

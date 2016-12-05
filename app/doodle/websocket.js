@@ -67,7 +67,7 @@ function connection(socket) {
   });
 
   // Broadcasts a stroke to a room
-  socket.on('stroke', function(room, stroke) {
+  socket.on('stroke', function(room, strokeCoords) {
   });
 
   // Exits a Doodle room. If user was the room owner, closes the room
