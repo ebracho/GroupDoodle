@@ -44,9 +44,16 @@ function authenticate(socket, data, cb) {
  * @param {Object} data
  */
 function postAuthenticate(socket, data) {
-  User.findOne({userId: data.session.userId}, function(err, user) {
-    socket.client.user = user;
-  });
+  User.findOne({userId: data.session.userId})
+    .then((user) => {
+      if (!user) {
+        console.err('User not found!');
+      }
+      socket.client.user = user;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 }
 
 /**
@@ -57,21 +64,22 @@ function postAuthenticate(socket, data) {
 function connection(socket) {
   // Ping-pong, for debugging
   socket.on('foo', function() {
-    console.log(`${socket.client.user.userId}>foo`);
     socket.emit('bar');
-    console.log(`${socket.client.user.userId}<bar`);
   });
 
-  // Joins a Doodle room
+  // Joins a Doodle room, emits all previous strokes recorded in redis.
   socket.on('joinRoom', function(room) {
+    socket.join(room);
   });
 
-  // Broadcasts a stroke to a room
-  socket.on('stroke', function(room, strokeCoords) {
+  // Broadcasts a stroke to a room, records stroke to redis
+  socket.on('stroke', function(room, stroke) {
+    socket.broadcast.to(room).emit('stroke', stroke);
   });
 
   // Exits a Doodle room. If user was the room owner, closes the room
   socket.on('leaveRoom', function(room) {
+    socket.leave(room);
   });
 }
 

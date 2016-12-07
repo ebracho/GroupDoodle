@@ -29170,13 +29170,22 @@
 	    _this.socket = (0, _socket2.default)();
 	    return _this;
 	  }
-	  /** Installs socket handlers. */
+	  /** Installs socket handlers and joins doodle room. */
 
 
 	  _createClass(DoodleRoom, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      this.installHandlers();
+	      this.socket.emit('joinRoom', this.props.params.id);
+	    }
+	    /** Leave rooom and disconnect socket when component unmounts. */
+
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.socket.emit('leaveRoom', this.props.params.id);
+	      this.socket.disconnect();
 	    }
 	    /** Installs auth handlers then doodle handlers if authenticated. */
 
@@ -29204,11 +29213,18 @@
 	      this.socket.on('terminate', this.terminateHandler);
 	      this.socket.on('bar', this.pongHandler);
 	    }
-	    /** Handles incoming stroke packet */
+	    /**
+	     * Handles incoming stroke packet
+	     *
+	     * @param {Stroke} stroke
+	     */
 
 	  }, {
 	    key: 'strokeHandler',
-	    value: function strokeHandler() {}
+	    value: function strokeHandler(stroke) {
+	      console.log(this.refs);
+	      this.refs.doodle.applyStroke(stroke);
+	    }
 	    /** Handles incoming terminate packet */
 
 	  }, {
@@ -29234,17 +29250,17 @@
 	  }, {
 	    key: 'broadcastStroke',
 	    value: function broadcastStroke(stroke) {
-	      console.log('broadcasting stroke', stroke.curX);
+	      this.socket.emit('stroke', this.props.params.id, stroke);
 	    }
 	    /** @param {Color} color */
 
 	  }, {
-	    key: 'setDoodleColor',
-	    value: function setDoodleColor(color) {
-	      this.refs.doodle.setColor(color);
+	    key: 'setDoodleStrokeStyle',
+	    value: function setDoodleStrokeStyle(color) {
+	      this.refs.doodle.setStrokeStyle(color.hex);
 	    }
 	    /**
-	     * Renders doodle in real time.
+	     * Renders doodle and color selector.
 	     *
 	     * @return {Element} Component DOM element.
 	     */
@@ -29264,7 +29280,7 @@
 	        ),
 	        _react2.default.createElement(_doodle2.default, { ref: 'doodle', onStroke: this.broadcastStroke.bind(this) }),
 	        _react2.default.createElement(_reactColor.SketchPicker, { color: '#fff',
-	          onChangeComplete: this.setDoodleColor.bind(this) })
+	          onChangeComplete: this.setDoodleStrokeStyle.bind(this) })
 	      );
 	    }
 	  }]);
@@ -50547,11 +50563,25 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	/** */
+	/**
+	 * Doodle rendering component.
+	 *
+	 * Renders a canvas element with strokes (small line segments) applied to it.
+	 *
+	 * Listens for mouse activity to apply new strokes to canvas.
+	 *
+	 * Accepts a callback function `props.onStroke` that is invoked with the stroke
+	 * object whenever a stroke is applied.
+	 *
+	 */
 	var Doodle = function (_React$Component) {
 	  _inherits(Doodle, _React$Component);
 
-	  /** @param {Propertys} props */
+	  /**
+	   * Initializes the stroke state.
+	   *
+	   * @param {Propertys} props
+	   */
 	  function Doodle(props) {
 	    _classCallCheck(this, Doodle);
 
@@ -50559,17 +50589,19 @@
 
 	    _this.state = {
 	      drawing: false,
-	      color: '#000',
 	      stroke: {
 	        prvX: 0,
 	        prvY: 0,
 	        curX: 0,
-	        curY: 0
+	        curY: 0,
+	        strokeStyle: '#000'
 	      }
 	    };
 	    return _this;
 	  }
-	  /** */
+	  /**
+	   * Initializes event listeners once the component is mounted.
+	   */
 
 
 	  _createClass(Doodle, [{
@@ -50577,19 +50609,26 @@
 	    value: function componentDidMount() {
 	      this.initEventListeners();
 	    }
-	    /** @return {Context} */
+	    /**
+	     * Returns a canvas context with specified strokeStyle
+	     *
+	     * @param {StrokeStyle} strokeStyle Hex color code for stroke
+	     * @return {Context}
+	     */
 
 	  }, {
 	    key: 'getContext',
-	    value: function getContext() {
+	    value: function getContext(strokeStyle) {
 	      var context = this.refs.canvas.getContext('2d');
 	      context.lineWidth = 3;
 	      context.lineJoin = 'round';
 	      context.lineCap = 'round';
-	      context.strokeStyle = this.state.color;
+	      context.strokeStyle = strokeStyle;
 	      return context;
 	    }
-	    /** */
+	    /**
+	     * Initializes all the event listeners for the doodle canvas.
+	     */
 
 	  }, {
 	    key: 'initEventListeners',
@@ -50597,13 +50636,20 @@
 	      var _this2 = this;
 
 	      var canvas = this.refs.canvas;
+	      /**
+	       * Updates the previous and current stroke coordinates.
+	       * If drawing flag is true, applies stroke with those coordinates.
+	       *
+	       * @param {Event} e
+	       */
 	      canvas.addEventListener('mousemove', function (e) {
 	        _this2.setState({
 	          stroke: {
 	            prvX: _this2.state.stroke.curX,
 	            prvY: _this2.state.stroke.curY,
 	            curX: e.pageX - canvas.offsetLeft,
-	            curY: e.pageY - canvas.offsetTop
+	            curY: e.pageY - canvas.offsetTop,
+	            strokeStyle: _this2.state.stroke.strokeStyle
 	          }
 	        });
 	        var _state$stroke = _this2.state.stroke,
@@ -50617,19 +50663,19 @@
 	          _this2.applyStroke(_this2.state.stroke, true);
 	        }
 	      }, false);
-
+	      /**
+	       * @param {Event} e
+	       */
 	      canvas.addEventListener('mousedown', function (e) {
 	        _this2.setState({
-	          drawing: true,
-	          stroke: {
-	            prvX: e.pageX - canvas.offsetLeft,
-	            prvY: e.pageY - canvas.offsetTop,
-	            curX: _this2.state.stroke.curX,
-	            curY: _this2.state.stroke.curY
-	          }
+	          drawing: true
 	        });
 	      }, false);
-
+	      /**
+	       * Sets drawing flag to false.
+	       *
+	       * @param {Event} e
+	       */
 	      canvas.addEventListener('mouseup', function (e) {
 	        _this2.setState({
 	          drawing: false
@@ -50637,6 +50683,8 @@
 	      }, false);
 	    }
 	    /**
+	     * Applies the given stroke to the canvas with specified strokeStyle.
+	     *
 	     * @param {StrokeCoords} stroke
 	     * @param {Boolean} invokeOnStroke
 	     */
@@ -50649,23 +50697,37 @@
 	      if (invokeOnStroke && this.props.onStroke) {
 	        this.props.onStroke(stroke);
 	      }
-	      var context = this.getContext();
+	      var context = this.getContext(stroke.strokeStyle);
 	      context.beginPath();
 	      context.moveTo(stroke.prvX, stroke.prvY);
 	      context.lineTo(stroke.curX, stroke.curY);
 	      context.stroke();
 	      context.closePath();
 	    }
-	    /** @param {Color} color */
+	    /**
+	     * Updates the current stroke state's style.
+	     *
+	     * @param {StrokeStyle} strokeStyle hex color code
+	     */
 
 	  }, {
-	    key: 'setColor',
-	    value: function setColor(color) {
+	    key: 'setStrokeStyle',
+	    value: function setStrokeStyle(strokeStyle) {
 	      this.setState({
-	        color: color.hex
+	        stroke: {
+	          prvX: this.state.stroke.prvX,
+	          prvY: this.state.stroke.prvY,
+	          curX: this.state.stroke.curX,
+	          curY: this.state.stroke.curY,
+	          strokeStyle: strokeStyle
+	        }
 	      });
 	    }
-	    /** @return {Element} */
+	    /**
+	     * Renders canvas with black border.
+	     *
+	     * @return {Element} canvas element.
+	     */
 
 	  }, {
 	    key: 'render',

@@ -1,7 +1,5 @@
 'use strict';
 
-require('mongoose').set('debug', true);
-
 let express = require('express');
 let User = require('../auth/models').User;
 let SessionToken = require('../auth/models').SessionToken;
@@ -15,11 +13,15 @@ let router = new express.Router();
  * @param {Function} next
  */
 function loadUser(req, res, next) {
-  User.findOne({userId: req.body.userId}, function(err, user) {
-    console.log('Prelaoded user:', user);
-    req.user = user;
-    next();
-  });
+  User.findOne({userId: req.body.userId})
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => {
+      console.err(err);
+      res.sendStatus(500);
+    });
 };
 
 /**
@@ -56,11 +58,12 @@ function register(req, res) {
  * @param {Response} res
  */
 function login(req, res) {
+  console.log(req.user);
   if(!req.user || !req.user.validatePassword(req.body.password)) {
     res.status(401).send('Incorrect userId or password'); return;
   }
   req.session.user = req.user;
-  SessionToken.create({userId: user.userId})
+  SessionToken.create({userId: req.user.userId})
     .then(function(sessionToken) {
       return res.status(200).json(sessionToken);
     })

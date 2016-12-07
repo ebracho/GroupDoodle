@@ -17,9 +17,15 @@ class DoodleRoom extends React.Component {
     this.session = getSession();
     this.socket = io();
   }
-  /** Installs socket handlers. */
+  /** Installs socket handlers and joins doodle room. */
   componentDidMount() {
     this.installHandlers();
+    this.socket.emit('joinRoom', this.props.params.id);
+  }
+  /** Leave rooom and disconnect socket when component unmounts. */
+  componentWillUnmount() {
+    this.socket.emit('leaveRoom', this.props.params.id);
+    this.socket.disconnect();
   }
   /** Installs auth handlers then doodle handlers if authenticated. */
   installHandlers() {
@@ -39,8 +45,13 @@ class DoodleRoom extends React.Component {
     this.socket.on('terminate', this.terminateHandler);
     this.socket.on('bar', this.pongHandler);
   }
-  /** Handles incoming stroke packet */
-  strokeHandler() {
+  /**
+   * Handles incoming stroke packet
+   *
+   * @param {Stroke} stroke
+   */
+  strokeHandler(stroke) {
+    this.refs.doodle.applyStroke(stroke);
   }
   /** Handles incoming terminate packet */
   terminateHandler() {
@@ -56,14 +67,14 @@ class DoodleRoom extends React.Component {
   }
   /** @param {Stroke} stroke */
   broadcastStroke(stroke) {
-    console.log('broadcasting stroke', stroke.curX);
+    this.socket.emit('stroke', this.props.params.id, stroke);
   }
   /** @param {Color} color */
-  setDoodleColor(color) {
-    this.refs.doodle.setColor(color);
+  setDoodleStrokeStyle(color) {
+    this.refs.doodle.setStrokeStyle(color.hex);
   }
   /**
-   * Renders doodle in real time.
+   * Renders doodle and color selector.
    *
    * @return {Element} Component DOM element.
    */
@@ -73,7 +84,7 @@ class DoodleRoom extends React.Component {
         <h2>Hello from Room {this.props.params.id}!</h2>
         <Doodle ref='doodle' onStroke={this.broadcastStroke.bind(this)}/>
         <SketchPicker color='#fff'
-          onChangeComplete={this.setDoodleColor.bind(this)} />
+          onChangeComplete={this.setDoodleStrokeStyle.bind(this)} />
       </div>
     );
   }
