@@ -10,6 +10,8 @@ import React from 'react';
  * Accepts a callback function `props.onStroke` that is invoked with the stroke
  * object whenever a stroke is applied.
  *
+ * Accepts callback function `props.init` which passes reference to
+ * `applyStroke` to allow strokes to be applied externally.
  */
 class Doodle extends React.Component {
   /**
@@ -34,7 +36,12 @@ class Doodle extends React.Component {
    * Initializes event listeners once the component is mounted.
    */
   componentDidMount() {
-    this.initEventListeners();
+    if (this.props.init) {
+      this.props.init(this.applyStroke.bind(this));
+    }
+    if (this.props.mutable) {
+      this.initEventListeners();
+    }
   }
   /**
    * Returns a canvas context with specified strokeStyle
@@ -136,7 +143,7 @@ class Doodle extends React.Component {
    */
   render() {
     let style = {border: '1px solid black'};
-    return <canvas ref="canvas" style={style} width={300} height={300} />;
+    return <canvas ref="canvas" style={style} width={700} height={400} />;
   }
 }
 

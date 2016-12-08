@@ -63,6 +63,7 @@ class AuthForm extends React.Component {
       errors.push('UserId must alphanumeric');
     if (this.state.password.length < 8 || this.state.password.length > 64)
       errors.push('Password must be between 8 and 64 chars.');
+    this.setState({errors});
     return errors.length == 0;
   }
   /**
@@ -132,10 +133,19 @@ class AuthForm extends React.Component {
         {this.state.errors.map(
           (err, i) => <p key={i} style={this.errorStyle}>{err}</p>
         )}
-        <input onChange={this.createInputBinding('userId')} />
-        <input type='password' onChange={this.createInputBinding('password')} />
-        <button onClick={this.login.bind(this)}>Login</button>
-        <button onClick={this.register.bind(this)}>Register</button>
+        <div className='form-group'>
+          <div><label htmlFor='userId'>UserId</label></div>
+          <input name='userId' onChange={this.createInputBinding('userId')} />
+        </div>
+        <div className='form-group'>
+          <div><label htmlFor='password'>Password</label></div>
+          <input type='password' name='password'
+            onChange={this.createInputBinding('password')} />
+        </div>
+        <button className='btn btn-secondary'
+          onClick={this.login.bind(this)}>Login</button>
+        <button className='btn btn-primary'
+          onClick={this.register.bind(this)}>Register</button>
       </form>
     );
   }

@@ -44,6 +44,26 @@ function getActiveRooms(req, res) {
 }
 
 /**
+ * Retrieves meta data for doodleRoom with roomId
+ *
+ * @param {Request} req
+ * @param {Response} res
+ */
+function getDoodleRoom(req, res) {
+  DoodleRoom.findOne({roomId: req.query.roomId})
+    .then(function(doodleRoom) {
+      if (!doodleRoom) {
+        res.sendStatus(404); return;
+      }
+      res.status(200).json(doodleRoom);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+}
+
+/**
  * Responds with a list of doodles.
  *
  * @param {Request} req
@@ -52,7 +72,7 @@ function getActiveRooms(req, res) {
 function getDoodles(req, res) {
   Doodle.find()
     .then(function(doodles) {
-      res.status(200).send(map(doodles, (doodle) => doodle.doodleId));
+      res.status(200).send(doodles.map((doodle) => doodle.doodleId));
     })
     .catch(function(err) {
       console.error(err);
@@ -67,7 +87,7 @@ function getDoodles(req, res) {
  * @param {Response} res
  */
 function getDoodle(req, res) {
-  Doodle.findOne({doodleId: req.body.doodleId})
+  Doodle.findOne({doodleId: req.query.doodleId})
     .then(function(doodle) {
       if (!doodle)
         res.sendStatus(404);
@@ -81,6 +101,7 @@ function getDoodle(req, res) {
 }
 
 router.post('/createRoom', createRoom);
+router.get('/getDoodleRoom', getDoodleRoom);
 router.get('/getActiveRooms', getActiveRooms);
 router.get('/getDoodles', getDoodles);
 router.get('/getDoodle', getDoodle);

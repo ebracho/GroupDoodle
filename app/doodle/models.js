@@ -14,15 +14,15 @@ let doodleSchema = new mongoose.Schema({
   illustrators: [{
     type: String,
     ref: 'User',
-    required: true,
   }],
   strokes: [{
-    startX: Number,
-    startY: Number,
-    endX: Number,
-    endY: Number,
-    color: Number, // hexcode
-    timestamp: Date,
+    _id: false,
+    prvX: Number,
+    prvY: Number,
+    curX: Number,
+    curY: Number,
+    strokeStyle: String, // hexcode
+    ts: Number,
     userId: String,
   }],
 });
